@@ -20,6 +20,7 @@ Route::get('/', function () {
 });
 
 Route::get('chat',[ChatController::class,'chat']);
+Route::get('send',[ChatController::class,'send']);
 
 Auth::routes();
 
