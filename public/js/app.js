@@ -5312,32 +5312,14 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 window.Vue = (__webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js")["default"]);
- // You need a specific loader for CSS files like https://github.com/webpack/css-loader
 
- // optional set default imeout, the default is 10000 (10 seconds).
 
 Vue.use((v_toaster__WEBPACK_IMPORTED_MODULE_0___default()), {
   timeout: 5000
 });
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
-
 Vue.component('message', (__webpack_require__(/*! ./components/Message.vue */ "./resources/js/components/Message.vue")["default"]));
 
 Vue.use((vue_chat_scroll__WEBPACK_IMPORTED_MODULE_2___default()));
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
 var app = new Vue({
   el: '#app',
   data: {
@@ -5349,8 +5331,7 @@ var app = new Vue({
       time: []
     },
     typing: '',
-    numberOfUsers: 0,
-    userstatus: ''
+    numberOfUsers: 0
   },
   watch: {
     message: function message() {
@@ -5369,9 +5350,9 @@ var app = new Vue({
         this.chat.user.push('you');
         this.chat.time.push(this.getTime());
         axios.post('/send', {
-          message: this.message
+          message: this.message,
+          chat: this.chat
         }).then(function (response) {
-          console.log(response);
           _this.message = '';
         })["catch"](function (error) {
           console.log(error);
@@ -5381,36 +5362,63 @@ var app = new Vue({
     getTime: function getTime() {
       var time = new Date();
       return time.getHours() + ':' + time.getMinutes();
+    },
+    getOldMessage: function getOldMessage() {
+      var _this2 = this;
+
+      axios.post('/getOldMessage').then(function (response) {
+        console.log(response);
+
+        if (response.data != '') {
+          _this2.chat = response.data;
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    deletesession: function deletesession() {
+      var _this3 = this;
+
+      axios.post('/deletesession').then(function (response) {
+        _this3.$toaster.success('Chat Deleted Successfully');
+      });
     }
   },
   mounted: function mounted() {
-    var _this2 = this;
+    var _this4 = this;
 
+    this.getOldMessage();
     Echo["private"]('chat').listen('ChatEvent', function (e) {
-      _this2.chat.message.push(e.message);
+      _this4.chat.message.push(e.message);
 
-      _this2.chat.color.push('warning');
+      _this4.chat.color.push('warning');
 
-      _this2.chat.user.push(e.user);
+      _this4.chat.user.push(e.user);
 
-      _this2.chat.time.push(_this2.getTime());
+      _this4.chat.time.push(_this4.getTime());
+
+      axios.post('/saveToSession', {
+        chat: _this4.chat
+      }).then(function (response) {})["catch"](function (error) {
+        console.log(error);
+      });
     }).listenForWhisper('typing', function (e) {
       if (e.name != '') {
-        _this2.typing = 'typing ...';
+        _this4.typing = 'typing ...';
       } else {
-        _this2.typing = '';
+        _this4.typing = '';
       }
     });
     Echo.join('chat').here(function (users) {
-      _this2.numberOfUsers = users.length;
+      _this4.numberOfUsers = users.length;
     }).joining(function (user) {
-      _this2.numberOfUsers += 1;
+      _this4.numberOfUsers += 1;
 
-      _this2.$toaster.success(user.name + 'join in Chat Room');
+      _this4.$toaster.success(user.name + 'join in Chat Room');
     }).leaving(function (user) {
-      _this2.numberOfUsers -= 1;
+      _this4.numberOfUsers -= 1;
 
-      _this2.$toaster.error(user.name + 'is Leave in  Chat Room');
+      _this4.$toaster.error(user.name + 'is Leave in  Chat Room');
     }).error(function (error) {
       console.error(error);
     });

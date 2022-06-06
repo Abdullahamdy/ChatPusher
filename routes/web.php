@@ -21,7 +21,13 @@ Route::get('/', function () {
 
 Route::get('chat',[ChatController::class,'chat']);
 Route::post('send',[ChatController::class,'send']);
+Route::post('getOldMessage',[ChatController::class,'getOldMessage']);
+Route::post('saveToSession',[ChatController::class,'saveToSession']);
+Route::post('deletesession',[ChatController::class,'DeleteSession']);
 
+// Route::get('check',function(){
+//   return  session('chat');
+// });
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

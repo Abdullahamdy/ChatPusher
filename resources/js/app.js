@@ -8,32 +8,12 @@ require('./bootstrap');
 
 window.Vue = require('vue').default;
 import Toaster from 'v-toaster'
- 
-// You need a specific loader for CSS files like https://github.com/webpack/css-loader
 import 'v-toaster/dist/v-toaster.css'
- 
-// optional set default imeout, the default is 10000 (10 seconds).
 Vue.use(Toaster, {timeout: 5000})
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
-
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
-
 Vue.component('message', require('./components/Message.vue').default);
 import VueChatScroll from 'vue-chat-scroll';
 Vue.use(VueChatScroll);
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
 
 const app = new Vue({
     el: '#app',
@@ -47,7 +27,7 @@ const app = new Vue({
         },
         typing : '',
         numberOfUsers:0,
-        userstatus:'',
+
     },
 
 watch:{
@@ -68,12 +48,13 @@ watch:{
             this.chat.user.push('you');
             this.chat.time.push(this.getTime());
 
+
                 axios.post('/send', {
 
-                    message :this.message
+                    message :this.message,
+                    chat:this.chat,
                   })
                   .then(response => {
-                    console.log(response);
                     this.message = '';
 
                   })
@@ -85,15 +66,50 @@ watch:{
         getTime(){
             let time = new Date();
             return time.getHours()+':'+time.getMinutes();
+        },
+        getOldMessage(){
+            axios.post('/getOldMessage')
+              .then(response => {
+                console.log(response);
+                if(response.data != ''){
+                    this.chat = response.data;
+                }
+
+              })
+              .catch(error => {
+                 console.log(error);
+              });
+
+        },
+        deletesession(){
+            axios.post('/deletesession')
+            .then(response => {
+                this.$toaster.success('Chat Deleted Successfully');
+
+            })
         }
     },
     mounted(){
+        this.getOldMessage();
+
         Echo.private('chat')
         .listen('ChatEvent',(e) => {
             this.chat.message.push(e.message);
             this.chat.color.push('warning');
             this.chat.user.push(e.user);
             this.chat.time.push(this.getTime());
+
+            axios.post('/saveToSession', {
+                chat:this.chat
+              })
+              .then(response => {
+
+              })
+              .catch(error => {
+                 console.log(error);
+              });
+
+
 
         })
         .listenForWhisper('typing', (e) => {
@@ -108,13 +124,13 @@ watch:{
         Echo.join('chat')
         .here((users) => {
             this.numberOfUsers = users.length;
-          
+
         })
         .joining((user) => {
-            
+
             this.numberOfUsers += 1;
             this.$toaster.success(user.name + 'join in Chat Room');
-          
+
 
         })
         .leaving((user) => {
