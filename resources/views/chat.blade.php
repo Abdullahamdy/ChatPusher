@@ -25,7 +25,7 @@
     <div class="container">
         <div class="row" id="app">
             <div class="offset-4 col-4" >
-                <li class="list-group-item active">Chat Room</li>
+                <li class="list-group-item active">Chat Room <span id="badge" class="badge badge-danger">@{{numberOfUsers}}</span></li>
                 <div class="badge badge-info">@{{typing}}</div>
                 <ul class="list-group" v-chat-scroll>
                        <message
@@ -47,6 +47,13 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
 <script src="{{asset('js/app.js')}}"></script>
+<style>
+#badge{
+    border-bottom: 10px;
+
+}
+</style>
+
 
 </body>
 </html>

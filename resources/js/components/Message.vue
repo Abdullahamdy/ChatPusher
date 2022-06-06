@@ -26,6 +26,8 @@
             console.log('Component mounted.')
         }
     }
+
+
 </script>
 <style>
 #time{

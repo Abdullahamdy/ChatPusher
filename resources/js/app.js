@@ -7,7 +7,13 @@
 require('./bootstrap');
 
 window.Vue = require('vue').default;
-
+import Toaster from 'v-toaster'
+ 
+// You need a specific loader for CSS files like https://github.com/webpack/css-loader
+import 'v-toaster/dist/v-toaster.css'
+ 
+// optional set default imeout, the default is 10000 (10 seconds).
+Vue.use(Toaster, {timeout: 5000})
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -22,6 +28,7 @@ window.Vue = require('vue').default;
 Vue.component('message', require('./components/Message.vue').default);
 import VueChatScroll from 'vue-chat-scroll';
 Vue.use(VueChatScroll);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -39,6 +46,8 @@ const app = new Vue({
             time:[],
         },
         typing : '',
+        numberOfUsers:0,
+        userstatus:'',
     },
 
 watch:{
@@ -94,6 +103,27 @@ watch:{
             }else{
                 this.typing = '';
             }
+        });
+
+        Echo.join('chat')
+        .here((users) => {
+            this.numberOfUsers = users.length;
+          
+        })
+        .joining((user) => {
+            
+            this.numberOfUsers += 1;
+            this.$toaster.success(user.name + 'join in Chat Room');
+          
+
+        })
+        .leaving((user) => {
+            this.numberOfUsers -= 1;
+            this.$toaster.error(user.name + 'is Leave in  Chat Room');
+
+        })
+        .error((error) => {
+            console.error(error);
         });
 
 
